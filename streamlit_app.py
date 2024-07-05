@@ -66,7 +66,7 @@ def main():
     # Step 1.5: Display "/readDigest ...continued"
     elif st.session_state.step == 1.5:
         st.subheader("Step 1.5: Copy the following text")
-        continued_text = f"/readDigest\n# Relevant Facts\n{st.session_state.inputs[0]}"
+        continued_text = f"/readDigest\n Guidelines: \n - Take your time  \n - Think through each step, use chain of thought reasoning based on the facts provided below. \n - Use your knowledge base to provide citations \n --- \n # Relevant Facts\n{st.session_state.inputs[0]}"
         st.text_area("Text to copy:", value=continued_text, height=200, key="step1_5", disabled=True)
         
         # Create a custom HTML button with JavaScript to handle copying
@@ -99,19 +99,26 @@ def main():
         # Create a custom HTML button with JavaScript to handle copying
         copy_button_html = f"""
         <button onclick="copyToClipboard()">Copy to Clipboard</button>
+        <div id="copyStatus"></div>
         <script>
         function copyToClipboard() {{
             const text = {json.dumps(rationale_text)};
-            navigator.clipboard.writeText(text).then(function() {{
-                alert('Copied to clipboard!');
-            }}, function(err) {{
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {{
+                document.execCommand('copy');
+                document.getElementById("copyStatus").innerHTML = "Copied to clipboard!";
+            }} catch (err) {{
+                document.getElementById("copyStatus").innerHTML = "Failed to copy. Please try again or copy manually.";
                 console.error('Could not copy text: ', err);
-                alert('Failed to copy. Please try again or copy manually.');
-            }});
+            }}
+            document.body.removeChild(textArea);
         }}
         </script>
         """
-        components.html(copy_button_html, height=50)
+        components.html(copy_button_html, height=70)
         
         st.info("Click the 'Copy to Clipboard' button to copy the text for the next step.")
         if st.button("Next"):
