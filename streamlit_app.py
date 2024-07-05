@@ -1,7 +1,6 @@
 import streamlit as st
 import streamlit.components.v1 as components  # Add this import for custom HTML/JavaScript
 import json  # Add this import
-import pyperclip 
 
 def get_quickrod_prepend():
     return "/quickRod\n# Task: You will be given a template rod below. Use the template only for structure, formatting, language and style. Use the contents of your analysis for the content of the ROD you will create. Remember to include citations of the Digest in your final rod.\n\n# Template\n"
