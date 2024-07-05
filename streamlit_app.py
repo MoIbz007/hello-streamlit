@@ -107,12 +107,14 @@ def main():
                 alert('Copied to clipboard!');
             }}, function(err) {{
                 console.error('Could not copy text: ', err);
+                alert('Failed to copy. Please try again or copy manually.');
             }});
         }}
         </script>
         """
         components.html(copy_button_html, height=50)
         
+        st.info("Click the 'Copy to Clipboard' button to copy the text for the next step.")
         if st.button("Next"):
             st.session_state.step = 3
             st.rerun()
