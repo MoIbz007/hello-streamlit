@@ -1,16 +1,6 @@
 import streamlit as st
-import pyperclip  # Add this import for clipboard operations
-
-def get_clipboard_content():
-    try:
-        return pyperclip.paste()
-    except:
-        st.error("Failed to access clipboard. Please paste manually.")
-        return ""
-
-def update_rod_input():
-    clipboard_content = get_clipboard_content()
-    st.session_state.inputs[2] = clipboard_content
+import streamlit.components.v1 as components  # Add this import for custom HTML/JavaScript
+import json  # Add this import
 
 def get_quickrod_prepend():
     return "/quickRod\n# Task: You will be given a template rod below. Use the template only for structure, formatting, language and style. Use the contents of your analysis for the content of the ROD you will create. Remember to include citations of the Digest in your final rod.\n\n# Template\n"
@@ -77,9 +67,24 @@ def main():
     elif st.session_state.step == 1.5:
         st.subheader("Step 1.5: Copy the following text")
         continued_text = f"/readDigest\n# Relevant Facts\n{st.session_state.inputs[0]}"
-        st.text_area("Click to copy:", value=continued_text, height=200, key="step1_5")
-        if st.button("Copy to Clipboard"):
-            copy_to_clipboard(continued_text)
+        st.text_area("Text to copy:", value=continued_text, height=200, key="step1_5", disabled=True)
+        
+        # Create a custom HTML button with JavaScript to handle copying
+        copy_button_html = f"""
+        <button onclick="copyToClipboard()">Copy to Clipboard</button>
+        <script>
+        function copyToClipboard() {{
+            const text = {json.dumps(continued_text)};
+            navigator.clipboard.writeText(text).then(function() {{
+                alert('Copied to clipboard!');
+            }}, function(err) {{
+                console.error('Could not copy text: ', err);
+            }});
+        }}
+        </script>
+        """
+        components.html(copy_button_html, height=50)
+
         st.info("Click the 'Copy to Clipboard' button to copy the text for the next step.")
         if st.button("Next"):
             st.session_state.step = 2
@@ -88,12 +93,25 @@ def main():
     # Step 2: /rationale
     elif st.session_state.step == 2:
         st.subheader("Step 2: /rationale")
-        # col1, col2 = st.columns([3, 1])
-        # with col1:
-        st.text_input("Copy this text:", value="/rationale", key="rationale_text", disabled=True)
-        # with col2:
-        if st.button("Copy"):
-            copy_to_clipboard("/rationale")
+        rationale_text = "/rationale"
+        st.text_input("Copy this text:", value=rationale_text, key="rationale_text", disabled=True)
+        
+        # Create a custom HTML button with JavaScript to handle copying
+        copy_button_html = f"""
+        <button onclick="copyToClipboard()">Copy to Clipboard</button>
+        <script>
+        function copyToClipboard() {{
+            const text = {json.dumps(rationale_text)};
+            navigator.clipboard.writeText(text).then(function() {{
+                alert('Copied to clipboard!');
+            }}, function(err) {{
+                console.error('Could not copy text: ', err);
+            }});
+        }}
+        </script>
+        """
+        components.html(copy_button_html, height=50)
+        
         if st.button("Next"):
             st.session_state.step = 3
             st.rerun()
@@ -101,12 +119,7 @@ def main():
     # Step 3: Similar ROD input
     elif st.session_state.step == 3:
         st.subheader("Step 3: Similar ROD")
-        col1, col2 = st.columns([3, 1])
-        with col1:
-            st.text_area("Enter a similar ROD:", height=200, key="step3", value=st.session_state.inputs[2], on_change=update_input, args=(2,))
-        with col2:
-            if st.button("Paste", on_click=update_rod_input):
-                st.rerun()
+        st.session_state.inputs[2] = st.text_area("Enter a similar ROD:", height=200, key="step3", value=st.session_state.inputs[2])
         if st.button("Next"):
             st.session_state.step = 4
             st.rerun()
@@ -116,12 +129,23 @@ def main():
         st.subheader("Step 4: /quickRod")
         prepended_value = get_quickrod_prepend()
         full_text = prepended_value + st.session_state.inputs[2]
-        col1, col2 = st.columns([3, 1])
-        with col1:
-            st.session_state.inputs[3] = st.text_area("Enter template ROD:", height=300, key="step4", value=full_text)
-        with col2:
-            if st.button("Copy to Clipboard"):
-                copy_to_clipboard(full_text)
+        st.session_state.inputs[3] = st.text_area("Enter template ROD:", height=300, key="step4", value=full_text)
+        
+        # Create a custom HTML button with JavaScript to handle copying
+        copy_button_html = f"""
+        <button onclick="copyToClipboard()">Copy to Clipboard</button>
+        <script>
+        function copyToClipboard() {{
+            const text = {json.dumps(full_text)};
+            navigator.clipboard.writeText(text).then(function() {{
+                alert('Copied to clipboard!');
+            }}, function(err) {{
+                console.error('Could not copy text: ', err);
+            }});
+        }}
+        </script>
+        """
+        components.html(copy_button_html, height=50)
         if st.button("Next"):
             st.session_state.step = 5
             st.rerun()
@@ -159,7 +183,7 @@ def update_input(step):
         st.session_state.inputs[step] = st.session_state[f"step{step+1}"]
     elif step == 4:
         # Remove the prepended value before saving
-        prepended_value = get_quickrod_prepend("")
+        prepended_value = get_quickrod_prepend()
         full_text = st.session_state[f"step{step}"]
         if full_text.startswith(prepended_value):
             st.session_state.inputs[step] = full_text[len(prepended_value):]
@@ -175,10 +199,6 @@ def generate_final_prompt():
     prompt += st.session_state.inputs[3]  # This now includes both the prepended value and user input
     prompt += f"\n\n{st.session_state.inputs[4]}"
     st.session_state.final_prompt = prompt
-
-def copy_to_clipboard(text):
-    pyperclip.copy(text)
-    st.success("Text copied to clipboard!")
 
 if __name__ == "__main__":
     main()
