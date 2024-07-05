@@ -32,22 +32,25 @@ def home_page():
         with col1:
             if st.button("VL ROD"):
                 st.session_state.rod_subtype = "vl"
+                st.session_state.gpt_link = gpt_dict.get("vl")
+                st.session_state.step = 1
+                st.rerun()
             if st.button("Dismissal ROD"):
                 st.session_state.rod_subtype = "dismissal"
+                st.session_state.gpt_link = gpt_dict.get("dismissal")
+                st.session_state.step = 1
+                st.rerun()
         with col2:
             if st.button("Antedate ROD"):
                 st.session_state.rod_subtype = "antedate"
+                st.session_state.gpt_link = gpt_dict.get("antedate")
+                st.session_state.step = 1
+                st.rerun()
             if st.button("Avail ROD"):
                 st.session_state.rod_subtype = "avail"
-
-        # Store the GPT link in session state when a ROD subtype is selected
-        if st.session_state.rod_subtype:
-            st.session_state.gpt_link = gpt_dict.get(st.session_state.rod_subtype)
-
-        # Add a "Start" button to proceed to the next step
-        if st.button("Start"):
-            st.session_state.step = 1
-            st.rerun()
+                st.session_state.gpt_link = gpt_dict.get("avail")
+                st.session_state.step = 1
+                st.rerun()
 
 def main():
     # Initialize session state
@@ -57,7 +60,7 @@ def main():
         st.session_state.final_prompt = ""
         st.session_state.rod_type = ""
         st.session_state.rod_subtype = ""
-        st.session_state.gpt_link = ""  # New session state variable for GPT link
+        st.session_state.gpt_link = ""
 
     # Home page
     if st.session_state.step == "home":
@@ -77,31 +80,39 @@ def main():
         continued_text = f"/readDigest\n Guidelines: \n - Take your time  \n - Think through each step, use chain of thought reasoning based on the facts provided below. \n - Use your knowledge base to provide citations \n --- \n # Relevant Facts\n{st.session_state.inputs[0]}"
         st.text_area("Text to copy:", value=continued_text, height=200, key="step1_5", disabled=True)
         
-        # Display the GPT link
-        if st.session_state.gpt_link:
-            st.markdown(f"[Click here to open GPT for {st.session_state.rod_subtype.upper()} ROD]({st.session_state.gpt_link})")
-            st.info("The link will open in a new tab. Please click it to proceed.")
-
         # Create a custom HTML button with JavaScript to handle copying
         copy_button_html = f"""
-        <button onclick="copyToClipboard()">Copy to Clipboard</button>
+        <button id="copyButton" onclick="copyToClipboard()">Copy to Clipboard</button>
+        <p id="copyStatus"></p>
         <script>
         function copyToClipboard() {{
             const text = {json.dumps(continued_text)};
             navigator.clipboard.writeText(text).then(function() {{
-                alert('Copied to clipboard!');
+                document.getElementById("copyButton").innerText = "Copied!";
+                document.getElementById("copyButton").disabled = true;
+                document.getElementById("copyStatus").innerText = "Text copied!";
             }}, function(err) {{
                 console.error('Could not copy text: ', err);
+                document.getElementById("copyStatus").innerText = "Failed to copy. Please try again.";
             }});
         }}
         </script>
         """
-        components.html(copy_button_html, height=50)
+        components.html(copy_button_html, height=70)
 
-        st.info("Click the 'Copy to Clipboard' button to copy the text for the next step.")
-        if st.button("Next"):
-            st.session_state.step = 2
-            st.rerun()
+        # Create a container for the Next button and GPT link
+        button_col, link_col = st.columns([1, 3])
+        
+        with button_col:
+            if st.button("Next"):
+                st.session_state.step = 2
+                st.rerun()
+
+        with link_col:
+            if st.session_state.gpt_link:
+                st.markdown(f"[Open GPT for {st.session_state.rod_subtype.upper()} ROD]({st.session_state.gpt_link})")
+
+        st.info("Please click 'Copy to Clipboard', then use the GPT link (if available), before clicking 'Next'.")
 
     # Step 2: /rationale
     elif st.session_state.step == 2:
