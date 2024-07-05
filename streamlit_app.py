@@ -2,6 +2,14 @@ import streamlit as st
 import streamlit.components.v1 as components  # Add this import for custom HTML/JavaScript
 import json  # Add this import
 
+# Add this dictionary at the top of the file, after the imports
+gpt_dict = {
+    "vl": "https://chatgpt.com/g/g-5Pagxlhnj-vl-gpt-4-0",
+    "avail": "https://chatgpt.com/g/g-tC5BSvbVG-avail-gpt-4-0",
+    "dismissal": "https://chatgpt.com/g/g-oYlLPnpwS-misconduct-gpt-4-0",
+    "antedate": "https://chatgpt.com/g/g-dt0gMdHGf-antedate-gpt-4-0"
+}
+
 def get_quickrod_prepend():
     return "/quickRod\n# Task: You will be given a template rod below. Use the template only for structure, formatting, language and style. Use the contents of your analysis for the content of the ROD you will create. Remember to include citations of the Digest in your final rod.\n\n# Template\n"
 
@@ -14,7 +22,6 @@ def home_page():
     with col1:
         if st.button("Regular ROD"):
             st.session_state.rod_type = "regular"
-            st.rerun()
 
     with col2:
         if st.button("Reconsideration ROD", disabled=True):
@@ -26,21 +33,24 @@ def home_page():
         with col1:
             if st.button("VL ROD"):
                 st.session_state.rod_subtype = "vl"
-                st.session_state.step = 1
-                st.rerun()
             if st.button("Dismissal ROD"):
                 st.session_state.rod_subtype = "dismissal"
-                st.session_state.step = 1
-                st.rerun()
         with col2:
             if st.button("Antedate ROD"):
                 st.session_state.rod_subtype = "antedate"
-                st.session_state.step = 1
-                st.rerun()
             if st.button("Avail ROD"):
                 st.session_state.rod_subtype = "avail"
-                st.session_state.step = 1
-                st.rerun()
+
+        # Add the GPT link button after a ROD type is selected
+        if st.session_state.rod_subtype:
+            gpt_link = gpt_dict.get(st.session_state.rod_subtype)
+            if gpt_link:
+                st.markdown(f"[Open GPT for {st.session_state.rod_subtype.upper()} ROD]({gpt_link})")
+
+        # Add a "Start" button to proceed to the next step
+        if st.button("Start"):
+            st.session_state.step = 1
+            st.rerun()
 
 def main():
     # Initialize session state
@@ -160,23 +170,6 @@ def main():
             st.rerun()
 
     # # Step 5: Final step and generate prompt
-    # elif st.session_state.step == 5:
-    #     st.subheader("Step 5: Final Input")
-    #     st.text_area("Enter any additional input:", height=200, key="step5", value=st.session_state.inputs[4], on_change=update_input, args=(4,))
-    #     if st.button("Generate Final Prompt"):
-    #         generate_final_prompt()
-    #         st.session_state.step = 6
-    #         st.rerun()
-
-    # # Display final prompt
-    # if st.session_state.step == 6:
-    #     st.subheader("Generated Prompt:")
-    #     st.text_area("", value=st.session_state.final_prompt, height=400, disabled=True)
-    #     if st.button("Start Over"):
-    #         st.session_state.step = 1
-    #         st.session_state.inputs = [""] * 5
-    #         st.session_state.final_prompt = ""
-    #         st.rerun()
 
     # Add a "Back to Home" button at the end of each step
     if st.session_state.step != "home":
