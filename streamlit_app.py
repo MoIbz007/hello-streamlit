@@ -1,6 +1,6 @@
 import streamlit as st
-import streamlit.components.v1 as components  # Add this import for custom HTML/JavaScript
-import json  # Add this import
+import streamlit.components.v1 as components
+import json
 
 # Add this dictionary at the top of the file, after the imports
 gpt_dict = {
@@ -9,7 +9,6 @@ gpt_dict = {
     "dismissal": "https://chatgpt.com/g/g-oYlLPnpwS-misconduct-gpt-4-0",
     "antedate": "https://chatgpt.com/g/g-dt0gMdHGf-antedate-gpt-4-0"
 }
-
 def get_quickrod_prepend():
     return "/quickRod\n# Task: You will be given a template rod below. Use the template only for structure, formatting, language and style. Use the contents of your analysis for the content of the ROD you will create. Remember to include citations of the Digest in your final rod.\n\n# Template\n"
 
@@ -41,11 +40,12 @@ def home_page():
             if st.button("Avail ROD"):
                 st.session_state.rod_subtype = "avail"
 
-        # Add the GPT link button after a ROD type is selected
+        # Display the link if a ROD subtype is selected
         if st.session_state.rod_subtype:
             gpt_link = gpt_dict.get(st.session_state.rod_subtype)
             if gpt_link:
-                st.markdown(f"[Open GPT for {st.session_state.rod_subtype.upper()} ROD]({gpt_link})")
+                st.markdown(f"[Click here to open GPT for {st.session_state.rod_subtype.upper()} ROD]({gpt_link})")
+                st.info("The link will open in a new tab. Please click it to proceed.")
 
         # Add a "Start" button to proceed to the next step
         if st.button("Start"):
