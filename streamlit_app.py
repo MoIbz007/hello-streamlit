@@ -40,12 +40,9 @@ def home_page():
             if st.button("Avail ROD"):
                 st.session_state.rod_subtype = "avail"
 
-        # Display the link if a ROD subtype is selected
+        # Store the GPT link in session state when a ROD subtype is selected
         if st.session_state.rod_subtype:
-            gpt_link = gpt_dict.get(st.session_state.rod_subtype)
-            if gpt_link:
-                st.markdown(f"[Click here to open GPT for {st.session_state.rod_subtype.upper()} ROD]({gpt_link})")
-                st.info("The link will open in a new tab. Please click it to proceed.")
+            st.session_state.gpt_link = gpt_dict.get(st.session_state.rod_subtype)
 
         # Add a "Start" button to proceed to the next step
         if st.button("Start"):
@@ -60,6 +57,7 @@ def main():
         st.session_state.final_prompt = ""
         st.session_state.rod_type = ""
         st.session_state.rod_subtype = ""
+        st.session_state.gpt_link = ""  # New session state variable for GPT link
 
     # Home page
     if st.session_state.step == "home":
@@ -79,6 +77,11 @@ def main():
         continued_text = f"/readDigest\n Guidelines: \n - Take your time  \n - Think through each step, use chain of thought reasoning based on the facts provided below. \n - Use your knowledge base to provide citations \n --- \n # Relevant Facts\n{st.session_state.inputs[0]}"
         st.text_area("Text to copy:", value=continued_text, height=200, key="step1_5", disabled=True)
         
+        # Display the GPT link
+        if st.session_state.gpt_link:
+            st.markdown(f"[Click here to open GPT for {st.session_state.rod_subtype.upper()} ROD]({st.session_state.gpt_link})")
+            st.info("The link will open in a new tab. Please click it to proceed.")
+
         # Create a custom HTML button with JavaScript to handle copying
         copy_button_html = f"""
         <button onclick="copyToClipboard()">Copy to Clipboard</button>
